@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import helmet from "helmet"; // For securing HTTP headers
 import cors from "cors";
 import session from 'express-session';
+import path from "path";
+import { existsSync } from "fs";
 
 import logger, { setupErrorHandlers } from "./config/logger";
 import { setup_HandleError } from "./utils";
@@ -44,15 +46,36 @@ app.use(session({
   cookie: { maxAge: 2 * 60 * 60 * 1000, sameSite: 'lax' },
 }));
 
-// Serve static files from the 'public' directory
-app.use(express.static('frontend/dist'));
+const frontendDistPath = path.resolve(process.cwd(), 'frontend', 'dist');
+const frontendIndexPath = path.join(frontendDistPath, 'index.html');
+const isFrontendBuilt = existsSync(frontendIndexPath);
+
+if (isFrontendBuilt) {
+  app.use(express.static(frontendDistPath));
+} else {
+  logger.warn(
+    `Frontend build is missing at ${frontendIndexPath}. API server will continue without static frontend hosting.`
+  );
+}
 
 // API Routes
 app.use('/api', apiRoutes);
 
-app.get('*', (_req, res) => {
-    res.sendFile('index.html', { root: 'frontend/dist' });
-});
+if (isFrontendBuilt) {
+  app.get('*', (_req, res) => {
+    res.sendFile(frontendIndexPath);
+  });
+} else {
+  app.get('*', (req, res) => {
+    if (req.path.startsWith('/api')) {
+      return res.status(404).json({ error: 'API route not found' });
+    }
+
+    return res.status(404).json({
+      error: 'Frontend is not built. Build frontend/dist to serve the web app from this server.'
+    });
+  });
+}
 
 /*
 const runAgents = async () => {
