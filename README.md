@@ -51,68 +51,76 @@ GitHub automation is planned for future development.
    ```
 
 3. **Set up environment variables**:
-   Rename the `.env.example` file to `.env` in the root directory and add your Instagram credentials. Refer to the `.env.example` file for the required variables.
-   ```dotenv # Instagram credentials
-   IGusername=your_instagram_username
-   IGpassword=your_instagram_password 
-   
-   Xusername= #Twitter username
-   Xpassword= #Twitter password
+   Rename `.env.example` to `.env` in the project root and fill your credentials.
 
-   MONGODB_URI= #MongoDB URI
-   ```
-
-## MongoDB Setup (Using Docker)
-
-1. **Install Docker**:
-   If you don't have Docker installed, download and install it from the [official website](https://www.docker.com/products/docker-desktop/)
-2. **Run MongoDB using Docker Container**:
-
-    **Option 1:**
-      ```sh
-      docker run -d -p 27017:27017 --name instagram-ai-mongodb mongodb/mongodb-community-server:latest
-      ```
-    **Option 2:**
-      ```sh
-      docker run -d -p 27017:27017 --name instagram-ai-mongodb -v mongodb_data:/data/db mongodb/mongodb-community-server:latest
-      ```   
-      (Option 2: use this if you want to have like a permanent storage in you so your data won't be lost or remove if you stop or remove your Docker container)
-3. **Modify the MONGODB_URI in the .env file**:
    ```dotenv
-   MONGODB_URI=mongodb://localhost:27017/instagram-ai-agent
-   ```
-4. **Verify the connection**:
-   Open a new terminal and run the following command:
-   ```sh
-   docker ps
-   ```
-   You should see the MongoDB container running.
+   IGusername=your_instagram_username
+   IGpassword=your_instagram_password
 
-   Docker Commands (Additional Info):
-   - To stop the MongoDB container:
-     ```sh
-     docker stop instagram-ai-mongodb
-     ```
-   - To start the MongoDB container:
-       ```sh
-       docker start instagram-ai-mongodb
-       ```
-   - To remove the MongoDB container:
-      ```sh
-      docker rm instagram-ai-mongodb
-      ```
-   - To remove the MongoDB container and its data:
-      ```sh
-      docker rm -v instagram-ai-mongodb
-      ```
+   Xusername=your_twitter_username
+   Xpassword=your_twitter_password
+
+   MONGODB_URI=mongodb://localhost:27017/instagram-ai-agent
+   SESSION_SECRET=replace_with_a_random_secret
+   ```
+
+## Local run on Windows (Docker MongoDB + npm start)
+
+1. **Start MongoDB in Docker Desktop**:
+
+   ```powershell
+   docker run -d -p 27017:27017 --name instagram-ai-mongodb mongodb/mongodb-community-server:latest
+   ```
+
+   Optional (with persistent volume):
+
+   ```powershell
+   docker run -d -p 27017:27017 --name instagram-ai-mongodb -v mongodb_data:/data/db mongodb/mongodb-community-server:latest
+   ```
+
+2. **Install packages**:
+
+   ```powershell
+   npm install
+   ```
+
+3. **Run the server**:
+
+   ```powershell
+   npm start
+   ```
+
+4. **Verify API health** (example):
+
+   ```powershell
+   curl http://localhost:3000/api
+   ```
+
+### Frontend behavior
+
+This repository currently runs the backend API even when `frontend/dist/index.html` is absent.
+
+- If `frontend/dist/index.html` exists, Express serves the static SPA.
+- If it does not exist, the server logs a warning once and continues running API routes.
+- Non-API routes return `404` with a JSON hint telling you to build/populate `frontend/dist`.
+
+If you keep frontend in a separate repository, just run that frontend separately and point it to this API.
+
+Useful Docker commands:
+
+```powershell
+docker ps
+docker stop instagram-ai-mongodb
+docker start instagram-ai-mongodb
+docker rm instagram-ai-mongodb
+docker rm -v instagram-ai-mongodb
+```
 
 ## Usage
 
-1. **Run the agent**:
-   ```sh
-   npm start
-   ```
-   Note: The specific platform (Instagram, Twitter) and actions performed by the agent are typically configured through environment variables in the `.env` file, or by selections made if the application prompts for choices at runtime.
+```sh
+npm start
+```
 
 ## Project Structure
 
