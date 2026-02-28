@@ -57,6 +57,10 @@ if (isFrontendBuilt) {
     `Frontend build is missing at ${frontendIndexPath}. API server will continue without static frontend hosting.`
   );
 }
+// Healthcheck (Railway)
+app.get("/health", (req, res) => {
+  return res.status(200).send("ok");
+});
 
 // API Routes
 app.use('/api', apiRoutes);
